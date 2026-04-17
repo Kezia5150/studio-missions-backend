@@ -99,10 +99,24 @@ function mailCorrection(editorName, taskName, note, token, round) {
 
 // ─── MIDDLEWARE ───────────────────────────────────────────────────────────────
 function adminOnly(req, res, next) {
-  const key = req.headers['x-admin-key'];
-  if (key !== ADMIN_KEY) return res.status(401).json({ error: 'Non autorisé' });
+  const key = (req.headers['x-admin-key'] || '').trim();
+  const expected = (ADMIN_KEY || '').trim();
+  if (key !== expected) {
+    console.log(`Auth failed. Received: "${key}" Expected: "${expected}"`);
+    return res.status(401).json({ error: 'Non autorisé' });
+  }
   next();
 }
+
+// Debug endpoint (à supprimer après test)
+app.get('/debug', (req, res) => {
+  res.json({
+    adminKeySet: !!process.env.ADMIN_KEY,
+    adminKeyLength: (process.env.ADMIN_KEY || '').length,
+    siteUrl: process.env.SITE_URL,
+    driveFileId: process.env.DRIVE_FILE_ID ? 'set' : 'missing',
+  });
+});
 
 // ─── DEADLINE CHECKER (toutes les 5 min) ─────────────────────────────────────
 async function checkDeadlines() {
