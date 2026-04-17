@@ -10,7 +10,12 @@ const { google } = require('googleapis');
 const crypto = require('crypto');
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'x-admin-key']
+}));
+app.options('*', cors());
 app.use(express.json());
 
 // ─── ENV VARS (set in Render dashboard) ───────────────────────────────────────
